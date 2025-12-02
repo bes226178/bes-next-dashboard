@@ -1,0 +1,32 @@
+
+> bes-next-app@0.1.0 dev
+> next dev --turbo -H 10.21.1.121 -p 6230
+
+   ▲ Next.js 15.0.3 (Turbopack)
+   - Local:        http://10.21.1.121:6230
+   - Network:      http://10.21.1.121:6230
+   - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 842ms
+
+> bes-next-app@0.1.0 dev
+> next dev --turbo -H 10.21.1.121 -p 6230 2.
+
+Invalid project directory provided, no such directory: /home/besadmin/next-app/next15-js-startup/2.
+
+> bes-next-app@0.1.0 dev
+> next dev --turbo -H 10.21.1.121 -p 6230 out.log
+
+> No such directory exists as the project root: /home/besadmin/next-app/next15-js-startup/out.log
+ ○ Compiling /weekly-report ...
+ ✓ Compiled /weekly-report in 9.8s
+(node:74556) [DEP0123] DeprecationWarning: Setting the TLS ServerName to an IP address is not permitted by RFC 6066. This will be ignored in a future version.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET /weekly-report?ORD_NO=1CB105 200 in 10720ms
+ GET /favicon.ico?favicon.92a72a13.ico 200 in 382ms
+ ○ Compiling /api/db ...
+ ✓ Compiled /api/db in 1138ms
+ GET /api/db?ordNo=1CB105 200 in 2491ms
+ GET /weekly-report?ORD_NO=1CA605 200 in 61ms
+ GET /api/db?ordNo=1CA605 200 in 483ms

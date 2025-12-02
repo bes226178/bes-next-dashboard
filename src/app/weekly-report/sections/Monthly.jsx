@@ -57,7 +57,7 @@ export default function Monthly({ data, plotData1, plotData2 }) {
           >
             資料來源：
             <br />
-            &emsp;• 工期進度：(月底日期 - 實際開工日期 + 1) / (預定完工日期 - 實際完工日期 + 1)
+            &emsp;• 工期進度：(月底日期 - 實際開工日期 + 1) / (預定完工日期 - 實際開工日期 + 1)
             <br />
             &emsp;• 預定進度：
             <br />

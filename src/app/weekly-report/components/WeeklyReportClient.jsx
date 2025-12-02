@@ -58,20 +58,20 @@ export default function WeeklyReportClient({ ordNoC }) {
   }, [data.wkWeeklyDate, selectedDate, setDefaultDate])
 
   // 強制要求 token 驗證
-  // 沒有 token 參數
-  if (!token || ordNoC !== 'TRUE') {
-    return <Error message="存取被拒絕：缺少必要的驗證 token" debugInfo={null} />
-  }
+ //   // 沒有 token 參數
+//   if (!token || ordNoC !== 'TRUE') {
+//     return <Error message="存取被拒絕：缺少必要的驗證 token" debugInfo={null} />
+//   }
 
-  // Token 驗證載入中
-  if (tokenLoading) {
-    return <Loading />
-  }
+//   // Token 驗證載入中
+//   if (tokenLoading) {
+//     return <Loading />
+//   }
 
-  // Token 驗證失敗
-  if (tokenError || tokenIsValid === false) {
-    return <Error message={tokenError || 'Token 驗證失敗'} debugInfo={tokenDebugInfo} />
-  }
+//   // Token 驗證失敗
+//   if (tokenError || tokenIsValid === false) {
+//     return <Error message={tokenError || 'Token 驗證失敗'} debugInfo={tokenDebugInfo} />
+//   }
 
   // 資料載入中
   if (loading) {
