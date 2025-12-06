@@ -1,15 +1,36 @@
 {
   "mcpServers": {
-    "supabase": {
-      "command": "cmd",
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "ctx7sk-905fc76e-dc22-4503-a63c-1f317ab4d552"
+      }
+    },
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_TOKEN": "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"
+      }
+    },
+    "mssqlStage": {
+      "command": "npx",
       "args": [
-        "/c",
-        "npx",
         "-y",
-        "@supabase/mcp-server-supabase",
-        "--access-token",
-        "sbp_df5c3b5f4ff59fdac2081aca46f4182edb119d1e"
-      ]
+        "@executeautomation/database-server",
+        "--sqlserver",
+        "--server",
+        "10.21.1.125",
+        "--port",
+        "1434",
+        "--database",
+        "STAGE",
+        "--user",
+        "sa",
+        "--password",
+        "bes@75094900"
+      ],
+      "type": "stdio"
     }
   }
 }
