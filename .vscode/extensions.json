@@ -1,0 +1,32 @@
+{
+  "recommendations": [
+    "typescriptteam.native-preview",
+    "sburg.vscode-javascript-booster",
+    "aaron-bond.better-comments",
+    "dbaeumer.vscode-eslint",
+    "dsznajder.es7-react-js-snippets",
+    "dzhavat.bracket-pair-toggler",
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "github.copilot",
+    "github.copilot-chat",
+    "jock.svg",
+    "mikestead.dotenv",
+    "ms-ceintl.vscode-language-pack-zh-hant",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "pkief.material-icon-theme",
+    "planbcoding.vscode-react-refactor",
+    "ritwickdey.liveserver",
+    "shan.code-settings-sync",
+    "shd101wyy.markdown-preview-enhanced",
+    "stripe.vscode-stripe",
+    "supabase-snippets.supabase-javascript-snippets",
+    "supabase.vscode-supabase-extension",
+    "vscodeshift.mui-snippets",
+    "zainchen.json",
+    "usernamehw.errorlens",
+    "quicktype.quicktype",
+    "anthropic.claude-code"
+  ]
+}

@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   devIndicators: false,
+  // 明確指定工作區根目錄
+  turbopack: {
+    root: process.cwd(), // 或使用絕對路徑
+  },
   images: {
     remotePatterns: [
       {

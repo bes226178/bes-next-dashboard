@@ -1,12 +1,132 @@
 {
+  // ========================================
+  // 程式碼格式化設定
+  // ========================================
+
+  // 儲存檔案時自動格式化程式碼
   "editor.formatOnSave": true,
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[jsonc]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+
+  // 設定預設的程式碼格式化工具為 Prettier
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 儲存時自動執行的程式碼動作
   "editor.codeActionsOnSave": {
+    // 自動整理 import 語句
+    // "source.organizeImports": "explicit",
+    // 自動修復 ESLint 發現的問題
     "source.fixAll.eslint": "explicit"
-  }
+  },
+
+  // ========================================
+  // ESLint 設定
+  // ========================================
+
+  // 指定 ESLint 的工作目錄，確保在專案根目錄執行
+  "eslint.workingDirectories": ["./"],
+
+  // ========================================
+  // 編輯器外觀設定
+  // ========================================
+
+  // 編輯器字體大小 (建議值: 14-20)
+  "editor.fontSize": 16,
+
+  // 整個 VS Code 視窗的縮放等級
+  // 0 = 100% (預設), 1 = 120%, 1.5 = 150%, 2 = 200%
+  // 負值會縮小: -1 = 80%, -0.5 = 90%
+  "window.zoomLevel": 1.0,
+
+  // ========================================
+  // 工作台 (Workbench) 設定
+  // ========================================
+
+  // 停用編輯器預覽模式，檔案會直接在新分頁開啟
+  "workbench.editor.enablePreview": false,
+
+  // 啟用分頁換行顯示，當分頁太多時會換行
+  "workbench.editor.wrapTabs": false,
+
+  // 活動欄 (左側圖示欄) 的顯示方向
+  // "vertical" = 垂直排列, "horizontal" = 水平排列
+  "workbench.activityBar.orientation": "vertical",
+
+  // ========================================
+  // 編輯器功能設定
+  // ========================================
+
+  // 啟用程式碼右側的小地圖 (minimap)
+  "editor.minimap.enabled": true,
+
+  // 啟用游標平滑動畫效果
+  "editor.cursorSmoothCaretAnimation": "on",
+
+  "editor.cursorStyle": "line",
+
+  // 啟用括號配對著色
+  "editor.bracketPairColorization.enabled": true,
+
+  // 啟用括號配對指引線
+  // "true" = 啟用
+  // "active" = 只在游標位於括號內時顯示指引線
+  // "false" = 不啟用
+  "editor.guides.bracketPairs": "active",
+
+  // 啟用縮排指引線
+  "editor.guides.indentation": true,
+
+  // 啟用程式碼摺疊
+  "editor.folding": true,
+
+  // 啟用自動儲存
+  // "afterDelay" = 延遲儲存
+  "files.autoSave": "afterDelay",
+
+  // 自動儲存延遲時間 (毫秒)
+  "files.autoSaveDelay": 1000,
+
+  // ========================================
+  // 檔案圖標主題設定
+  // ========================================
+
+  // 檔案圖標主題選擇
+  // 熱門選項：
+  // "null" = 不使用圖標主題
+  // "vs-minimal" (極簡風格)
+  // "vs-seti" (預設，簡潔風格)
+  // "material-icon-theme" (Material Design 風格)
+  "workbench.iconTheme": "material-icon-theme",
+
+  // ========================================
+  // 程式碼編輯增強設定
+  // ========================================
+
+  // 啟用空白字元顯示
+  // "none" = 不顯示空白字元
+  // "boundary" = 顯示空白字元邊界
+  // "selection" = 顯示選取範圍內的空白字元
+  // "trailing" = 顯示行尾的空白字元
+  // "all" = 顯示所有空白字元
+  "editor.renderWhitespace": "trailing",
+
+  // 啟用行號顯示
+  // "off" = 不顯示行號
+  // "on" = 顯示行號
+  // "relative" = 相對行號
+  // "interval" = 間隔行號
+  "editor.lineNumbers": "on",
+
+  // 啟用程式碼摺疊標記
+  // "always" = 顯示摺疊標記
+  // "never" = 不顯示摺疊標記
+  // "mouseover" = 滑鼠懸停時顯示摺疊標記
+  "editor.showFoldingControls": "always",
+
+  // ========================================
+  // 重要設定
+  // ========================================
+
+  // 設定 Stripe CLI 安裝路徑，路徑導向到 stripe_cli 資料夾
+  // "stripe.cliInstallPath": "C:\\Users\\user\\Documents\\GitHub\\mathify.io-next\\stripe_cli\\stripe.exe"
+  "stripe.cliInstallPath": "C:\\Users\\226178\\Desktop\\GitHub\\mathify.io-next\\stripe_cli\\stripe.exe",
+  "workbench.sideBar.location": "left"
 }
