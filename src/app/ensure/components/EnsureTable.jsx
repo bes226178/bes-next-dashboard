@@ -36,10 +36,42 @@ export default function EnsureTable({ data = [], descData = [] }) {
     setSiteFilter('') // 點擊卡片時，將工務所篩選重設為全部
   }, [])
 
-  // 獲取所有不重複的工務所名稱
+  // 獲取所有不重複的工務所名稱，依照 ORD_NO 排序
   const uniqueSites = useMemo(() => {
-    const sites = data.map(row => row.SITE_CNAME).filter(site => site && site.trim() !== '')
-    return [...new Set(sites)].sort()
+    // 建立 Map 來儲存每個工務所對應的最小 ORD_NO
+    const siteOrdNoMap = new Map()
+
+    data.forEach(row => {
+      const site = row.SITE_CNAME
+      const ordNo = row.ORD_NO
+
+      if (site && site.trim() !== '' && ordNo != null) {
+        // 如果該工務所還沒有記錄，或找到更小的 ORD_NO，則更新
+        if (!siteOrdNoMap.has(site) || siteOrdNoMap.get(site) > ordNo) {
+          siteOrdNoMap.set(site, ordNo)
+        }
+      }
+    })
+
+    // 轉換為陣列並依照 ORD_NO 排序
+    return Array.from(siteOrdNoMap.entries())
+      .sort((a, b) => {
+        // 比較 ORD_NO（數字或字串）
+        const ordNoA = a[1]
+        const ordNoB = b[1]
+
+        // 如果都是數字，進行數值比較
+        if (typeof ordNoA === 'number' && typeof ordNoB === 'number') {
+          return ordNoA - ordNoB
+        }
+
+        // 否則進行字串比較
+        return String(ordNoA).localeCompare(String(ordNoB), undefined, {
+          numeric: true,
+          sensitivity: 'base',
+        })
+      })
+      .map(([site]) => site) // 只提取工務所名稱
   }, [data])
 
   // 篩選後的數據，並添加行號

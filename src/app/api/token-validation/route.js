@@ -12,11 +12,26 @@ export async function GET(request) {
 
     // 先查詢 token 是否存在（不考慮過期時間）
     const tokenExistsQuery = `
-  SELECT TOKEN, EXPIRES_AT, DATEADD(HOUR, 8, GETUTCDATE()) as CURRENT_TIME_UTC8
-  FROM SYS_ACCESS_TOKEN
-  WHERE TOKEN = @token
-`
+      SELECT TOKEN, EXPIRES_AT, DATEADD(HOUR, 8, GETUTCDATE()) as CURRENT_TIME_UTC8
+      FROM SYS_ACCESS_TOKEN
+      WHERE TOKEN = @token
+    `
     const tokenExistsResult = await tables.sysAccessToken.stageDb.query(tokenExistsQuery, { token })
+
+    // 檢查 token 是否存在
+    if (!tokenExistsResult || tokenExistsResult.length === 0) {
+      // Token 不存在，導向到 token 失效頁面
+      return NextResponse.redirect(new URL('/token-expired', request.url))
+    }
+
+    // 檢查 token 是否已過期
+    const expiresAt = tokenExistsResult[0].EXPIRES_AT
+    const currentTime = tokenExistsResult[0].CURRENT_TIME_UTC8
+
+    if (new Date(currentTime) >= new Date(expiresAt)) {
+      // Token 已過期，導向到 token 失效頁面
+      return NextResponse.redirect(new URL('/token-expired', request.url))
+    }
 
     // 再執行原本的驗證查詢
     const result = await tables.sysAccessToken.validateToken(token)
@@ -27,12 +42,8 @@ export async function GET(request) {
         message: 'Token 驗證成功',
         debugInfo: {
           token: token,
-          expiresAt:
-            tokenExistsResult && tokenExistsResult[0] ? tokenExistsResult[0].EXPIRES_AT : null,
-          currentTime:
-            tokenExistsResult && tokenExistsResult[0]
-              ? tokenExistsResult[0].CURRENT_TIME_UTC8
-              : null,
+          expiresAt: expiresAt,
+          currentTime: currentTime,
         },
       })
     } else {
@@ -40,19 +51,9 @@ export async function GET(request) {
       const debugInfo = {
         token: token,
         tokenExists: tokenExistsResult && tokenExistsResult.length > 0,
-        expiresAt:
-          tokenExistsResult && tokenExistsResult[0]
-            ? tokenExistsResult[0].EXPIRES_AT
-            : 'Token 不存在',
-        currentTime:
-          tokenExistsResult && tokenExistsResult[0]
-            ? tokenExistsResult[0].CURRENT_TIME_UTC8
-            : '無法取得時間',
-        isExpired:
-          tokenExistsResult && tokenExistsResult[0]
-            ? new Date(tokenExistsResult[0].CURRENT_TIME_UTC8) >=
-              new Date(tokenExistsResult[0].EXPIRES_AT)
-            : '無法判斷',
+        expiresAt: expiresAt || 'Token 不存在',
+        currentTime: currentTime || '無法取得時間',
+        isExpired: expiresAt ? new Date(currentTime) >= new Date(expiresAt) : '無法判斷',
       }
 
       return NextResponse.json(
