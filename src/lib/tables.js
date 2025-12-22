@@ -340,5 +340,91 @@ export const tables = {
       `
       return await db.query(query, { employeeId })
     },
+    // 查詢所有離職人員
+    getResignedEmployees: async () => {
+      const query = `
+        SELECT 
+          EMPLOYEE_ID,
+          EMPLOYEE_NAME,
+          DEPARTMENT_NAME,
+          DATE_START,
+          DATE_RESIGN,
+          YEARS_IN_OFFICE,
+          EMPLOYEE_SENIORITY,
+          JOB_STATUS,
+          DATE_RESIGN_YEAR,
+          DATE_RESIGN_MONTH
+        FROM FR_EMPLOYEE
+        WHERE JOB_STATUS = '離職'
+          AND DATE_RESIGN != '1900-01-01'
+        ORDER BY DATE_RESIGN DESC
+      `
+      return await db.query(query)
+    },
+    // 查詢離職人員並計算服務年資（使用 SQL 計算以確保準確性）
+    getResignedEmployeesWithTenure: async () => {
+      const query = `
+        SELECT 
+          EMPLOYEE_ID,
+          EMPLOYEE_NAME,
+          DEPARTMENT_NAME,
+          DEPARTMENT_NAME_WITHOUT_STATION,
+          DEPARTMENT_TYPE,
+          DATE_START,
+          DATE_RESIGN,
+          CASE 
+            WHEN DATE_RESIGN != '1900-01-01' AND DATE_START IS NOT NULL 
+            THEN CAST(DATEDIFF(DAY, CAST(DATE_START AS DATE), CAST(DATE_RESIGN AS DATE)) AS FLOAT) / 365.25
+            ELSE NULL
+          END AS TENURE_YEARS,
+          CASE 
+            WHEN DATE_START IS NOT NULL THEN YEAR(CAST(DATE_START AS DATE))
+            ELSE NULL
+          END AS START_YEAR,
+          YEARS_IN_OFFICE,
+          EMPLOYEE_SENIORITY,
+          JOB_STATUS,
+          DATE_RESIGN_YEAR,
+          DATE_RESIGN_MONTH,
+          JOB_NAME,
+          GRADE_NAME,
+          GRADE_ID
+        FROM FR_EMPLOYEE
+        WHERE JOB_STATUS = '離職'
+          AND DATE_RESIGN != '1900-01-01'
+          AND DATE_START IS NOT NULL
+        ORDER BY DATE_RESIGN DESC
+      `
+      return await db.query(query)
+    },
+    // 查詢所有員工（包括在職和離職）用於熱力圖分析
+    getAllEmployeesForHeatmap: async () => {
+      const query = `
+        SELECT 
+          EMPLOYEE_ID,
+          DATE_START,
+          GRADE_NAME,
+          GRADE_ID,
+          DEPARTMENT_TYPE,
+          CASE 
+            WHEN DATE_START IS NOT NULL THEN YEAR(CAST(DATE_START AS DATE))
+            ELSE NULL
+          END AS START_YEAR,
+          CASE 
+            WHEN DATE_RESIGN != '1900-01-01' AND DATE_START IS NOT NULL 
+            THEN CAST(DATEDIFF(DAY, CAST(DATE_START AS DATE), CAST(DATE_RESIGN AS DATE)) AS FLOAT) / 365.25
+            WHEN DATE_START IS NOT NULL 
+            THEN CAST(DATEDIFF(DAY, CAST(DATE_START AS DATE), GETDATE()) AS FLOAT) / 365.25
+            ELSE NULL
+          END AS TENURE_YEARS,
+          JOB_STATUS
+        FROM FR_EMPLOYEE
+        WHERE DATE_START IS NOT NULL
+          AND GRADE_NAME IS NOT NULL
+          AND GRADE_NAME != ''
+          AND YEAR(CAST(DATE_START AS DATE)) IS NOT NULL
+      `
+      return await db.query(query)
+    },
   },
 }
