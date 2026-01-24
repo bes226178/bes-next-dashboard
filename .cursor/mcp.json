@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "context7": {
+"context7": {
       "url": "https://mcp.context7.com/mcp",
       "headers": {
         "CONTEXT7_API_KEY": "ctx7sk-905fc76e-dc22-4503-a63c-1f317ab4d552"
@@ -13,7 +13,30 @@
         "NOTION_TOKEN": "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"
       }
     },
-    "mssqlDW": {
+ "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
+      }
+    },
+    "mui-mcp": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mui/mcp@latest"]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": [
+        "shadcn@latest",
+        "mcp"
+      ]
+    },
+"@magicuidesign/mcp": {
+            "command": "cmd",
+            "args": ["/c", "npx", "-y", "@magicuidesign/mcp@latest"]
+        },
+"mssqlDW": {
       "command": "npx",
       "args": [
         "-y",
@@ -69,22 +92,6 @@
         "Bes@75094900"
       ],
       "type": "stdio"
-    },
-    "shadcn": {
-      "command": "npx",
-      "args": ["shadcn@latest", "mcp"]
-    },
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "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"
-      }
-    },
-    "mui-mcp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@mui/mcp@latest"]
     }
   }
 }

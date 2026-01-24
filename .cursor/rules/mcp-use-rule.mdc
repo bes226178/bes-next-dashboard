@@ -19,3 +19,7 @@ alwaysApply: false
 ### finedb 資料庫
 - **關鍵字**：`finedb`、`finedb 資料庫`、`finedb`、`fineDB`
 - **MCP 伺服器**：`mssqlfinedb`
+- 
+### gcmis 資料庫
+- **關鍵字**：`gcmis`、`gcmis 資料庫`、`goinfo`、`GOINFO`
+- **MCP 伺服器**：`mssqlGOINFO`
