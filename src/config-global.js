@@ -5,6 +5,9 @@ export const CONFIG = {
   MSSQL_DATABASE: process.env.MSSQL_DATABASE,
   MSSQL_SERVER: process.env.MSSQL_SERVER,
   MSSQL_PORT: Number(process.env.MSSQL_PORT),
+  // Supabase
+  SUPABASE_URL: process.env.SUPABASE_URL,
+  SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
 }
 
 export const COLOR = {
