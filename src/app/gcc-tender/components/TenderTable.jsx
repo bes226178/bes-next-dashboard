@@ -169,7 +169,7 @@ export default function TenderTable({
 }) {
   const router = useRouter()
 
-  // 點擊標案列導向詳細頁
+  // 點擊標案列導向詳細頁（以標案名稱為 key）
   const handleRowClick = item => {
     router.push(`/gcc-tender/${item.id}`)
   }
@@ -246,7 +246,14 @@ export default function TenderTable({
                   <TableCell className="font-medium">
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="line-clamp-2">{item.tender_name || '-'}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="line-clamp-2">{item.tender_name || '-'}</span>
+                          {item.history_count > 1 && (
+                            <Badge variant="secondary" className="shrink-0 text-xs">
+                              {item.history_count} 次公告
+                            </Badge>
+                          )}
+                        </div>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-md">
                         <p>{item.tender_name}</p>

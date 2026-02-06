@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeft, ExternalLink, Calendar, Building2, FileText, DollarSign } from 'lucide-react'
+import { ArrowLeft, ExternalLink, Calendar, Building2, FileText, DollarSign, History, Clock } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,25 @@ async function getTenderAnnouncement(id) {
   if (error) {
     console.error('取得標案公告失敗:', error)
     return null
+  }
+
+  return data
+}
+
+// 取得同名標案的所有歷史公告（依公告日期降冪排序）
+async function getTenderHistory(tenderName, currentId) {
+  if (!tenderName) return []
+
+  const { data, error } = await supabase
+    .from('gcc_tender_announcement')
+    .select('*')
+    .eq('tender_name', tenderName)
+    .neq('id', currentId)
+    .order('announcement_date', { ascending: false })
+
+  if (error) {
+    console.error('取得標案歷史失敗:', error)
+    return []
   }
 
   return data
@@ -49,6 +68,30 @@ async function getTenderDetail(announcementId) {
   }
 
   return data
+}
+
+// 批量取得多筆標案的詳細資料（用於歷史比對）
+async function getTenderDetailsForAnnouncements(announcementIds) {
+  if (!announcementIds || announcementIds.length === 0) return {}
+
+  const { data, error } = await supabase
+    .from('gcc_tender_detail')
+    .select('*')
+    .in('announcement_id', announcementIds)
+
+  if (error) {
+    console.error('批量取得標案詳情失敗:', error)
+    return {}
+  }
+
+  // 建立 announcement_id -> detail 的對應表
+  const map = {}
+  for (const detail of data) {
+    if (detail.announcement_id) {
+      map[detail.announcement_id] = detail
+    }
+  }
+  return map
 }
 
 // 取得欄位對應表
@@ -206,6 +249,194 @@ function CommitteeTable({ committee }) {
   )
 }
 
+// 歷史變動比對：找出兩筆公告之間的差異欄位
+function getAnnouncementChanges(current, previous) {
+  const trackFields = [
+    { key: 'org_name', label: '機關名稱' },
+    { key: 'announcement_date', label: '公告日期' },
+    { key: 'deadline', label: '截止日期' },
+    { key: 'budget', label: '預算金額' },
+    { key: 'tender_method', label: '招標方式' },
+    { key: 'procurement_nature', label: '採購性質' },
+    { key: 'tender_no', label: '案號' },
+    { key: 'is_correction', label: '是否更正' },
+    { key: 'transmission_count', label: '傳輸次數' },
+  ]
+
+  return trackFields.filter(f => {
+    const curr = current[f.key]
+    const prev = previous[f.key]
+    if (curr == null && prev == null) return false
+    return String(curr ?? '') !== String(prev ?? '')
+  })
+}
+
+// 詳細資料變動比對：利用 fieldMapping 找出兩筆 detail 之間的差異
+function getDetailChanges(currentDetail, previousDetail, fieldMapping) {
+  if (!currentDetail && !previousDetail) return []
+  if (!currentDetail || !previousDetail) {
+    // 其中一方無 detail，標示為整體新增或移除
+    return currentDetail && !previousDetail
+      ? [{ key: '_detail_added', label: '詳細資料', oldVal: '（無）', newVal: '（新增）' }]
+      : [{ key: '_detail_removed', label: '詳細資料', oldVal: '（有）', newVal: '（已移除）' }]
+  }
+
+  const changes = []
+  for (const field of fieldMapping) {
+    const currVal = currentDetail[field.field_code]
+    const prevVal = previousDetail[field.field_code]
+
+    // 跳過兩邊都是空的
+    if ((currVal == null || currVal === '') && (prevVal == null || prevVal === '')) continue
+    // 比對差異
+    if (String(currVal ?? '') !== String(prevVal ?? '')) {
+      changes.push({
+        key: field.field_code,
+        label: `[${CATEGORY_NAMES[field.category] || field.category}] ${field.field_name}`,
+        oldVal: String(prevVal ?? '-'),
+        newVal: String(currVal ?? '-'),
+      })
+    }
+  }
+  return changes
+}
+
+// 歷史紀錄卡片
+function HistoryTimeline({ history, currentAnnouncement, detailMap, fieldMapping }) {
+  if (!history || history.length === 0) return null
+
+  // 將所有紀錄（含目前最新）按日期降冪排列供比對
+  const allRecords = [currentAnnouncement, ...history]
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center gap-2">
+          <History className="h-5 w-5 text-slate-500" />
+          <CardTitle>公告歷程</CardTitle>
+          <Badge variant="secondary">{allRecords.length} 次公告</Badge>
+        </div>
+        <CardDescription>此標案的過去公告變動紀錄（含公告資訊與詳細資料比對）</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="relative space-y-0">
+          {/* Timeline line */}
+          <div className="absolute left-[15px] top-2 bottom-2 w-px bg-slate-200" />
+
+          {allRecords.map((record, index) => {
+            const isLatest = index === 0
+            const previousRecord = index < allRecords.length - 1 ? allRecords[index + 1] : null
+            const announcementChanges = previousRecord ? getAnnouncementChanges(record, previousRecord) : []
+            const detailChanges = previousRecord
+              ? getDetailChanges(detailMap[record.id] || null, detailMap[previousRecord.id] || null, fieldMapping)
+              : []
+            const hasChanges = announcementChanges.length > 0 || detailChanges.length > 0
+
+            return (
+              <div key={record.id} className="relative pl-10 pb-6 last:pb-0">
+                {/* Timeline dot */}
+                <div
+                  className={`absolute left-2 top-1.5 h-3 w-3 rounded-full border-2 ${
+                    isLatest
+                      ? 'border-blue-500 bg-blue-500'
+                      : 'border-slate-300 bg-white'
+                  }`}
+                />
+
+                <div className={`rounded-lg border p-4 ${isLatest ? 'border-blue-200 bg-blue-50/50' : 'border-slate-200 bg-white'}`}>
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                      <Clock className="h-3.5 w-3.5" />
+                      {record.announcement_date || '未知日期'}
+                    </div>
+                    {isLatest && (
+                      <Badge className="bg-blue-500 text-white">最新</Badge>
+                    )}
+                    {record.is_correction && (
+                      <Badge variant="outline" className="border-amber-300 text-amber-600">更正公告</Badge>
+                    )}
+                    {record.detail_url && (
+                      <a
+                        href={record.detail_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                        政府採購網
+                      </a>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm sm:grid-cols-4">
+                    <div>
+                      <span className="text-slate-500">案號：</span>
+                      <span className="font-medium">{record.tender_no || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">截止日期：</span>
+                      <span className="font-medium">{record.deadline || '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">預算金額：</span>
+                      <span className="font-medium">{record.budget ? `NT$ ${record.budget}` : '-'}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">招標方式：</span>
+                      <span className="font-medium">{record.tender_method || '-'}</span>
+                    </div>
+                  </div>
+
+                  {/* 顯示與前一筆的差異 */}
+                  {hasChanges && (
+                    <div className="mt-3 space-y-2">
+                      {/* 公告欄位差異 */}
+                      {announcementChanges.length > 0 && (
+                        <div className="rounded-md bg-amber-50 px-3 py-2">
+                          <p className="mb-1 text-xs font-medium text-amber-700">公告資訊變動：</p>
+                          <div className="space-y-1">
+                            {announcementChanges.map(change => (
+                              <div key={change.key} className="text-xs text-amber-800">
+                                <span className="font-medium">{change.label}</span>
+                                {' '}
+                                <span className="text-amber-600">{String(previousRecord[change.key] ?? '-')}</span>
+                                {' → '}
+                                <span className="font-medium">{String(record[change.key] ?? '-')}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 詳細資料欄位差異 */}
+                      {detailChanges.length > 0 && (
+                        <div className="rounded-md bg-blue-50 px-3 py-2">
+                          <p className="mb-1 text-xs font-medium text-blue-700">詳細資料變動：</p>
+                          <div className="space-y-1">
+                            {detailChanges.map(change => (
+                              <div key={change.key} className="text-xs text-blue-800">
+                                <span className="font-medium">{change.label}</span>
+                                {' '}
+                                <span className="line-clamp-1 inline text-blue-600">{change.oldVal}</span>
+                                {' → '}
+                                <span className="line-clamp-1 inline font-medium">{change.newVal}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 export default async function TenderDetailPage({ params }) {
   const { id } = await params
 
@@ -218,9 +449,17 @@ export default async function TenderDetailPage({ params }) {
     notFound()
   }
 
-  const detail = await getTenderDetail(id)
+  // 取得同名標案歷史紀錄與當前詳細資料
+  const [detail, history] = await Promise.all([
+    getTenderDetail(id),
+    getTenderHistory(announcement.tender_name, id),
+  ])
   const committee = detail?.id ? await getEvaluationCommittee(detail.id) : []
   const procurementLevel = detail?.gcc_committee_list_info?.[0]?.procurement_level
+
+  // 批量取得所有歷史公告的詳細資料（含當前，用於比對）
+  const allAnnouncementIds = [id, ...history.map(h => h.id)]
+  const historyDetailMap = await getTenderDetailsForAnnouncements(allAnnouncementIds)
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -249,6 +488,11 @@ export default async function TenderDetailPage({ params }) {
               </div>
               <div className="flex items-center gap-2">
                 {getProcurementLevelBadge(procurementLevel)}
+                {history.length > 0 && (
+                  <Badge variant="secondary">
+                    {history.length + 1} 次公告
+                  </Badge>
+                )}
                 {announcement.detail_url && (
                   <Button variant="outline" size="sm" asChild className="cursor-pointer">
                     <a href={announcement.detail_url} target="_blank" rel="noopener noreferrer">
@@ -329,6 +573,16 @@ export default async function TenderDetailPage({ params }) {
             </div>
           </CardContent>
         </Card>
+
+        {/* 公告歷程（有歷史記錄才顯示） */}
+        {history.length > 0 && (
+          <HistoryTimeline
+            history={history}
+            currentAnnouncement={announcement}
+            detailMap={historyDetailMap}
+            fieldMapping={fieldMapping}
+          />
+        )}
 
         {/* 詳細資料標籤頁 */}
         {detail && (
